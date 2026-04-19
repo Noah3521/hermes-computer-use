@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+
+# Runtime state (Xvfb logs, Chrome profile, screenshots, lockfiles)
+state/
+/tmp-state/
+*.log
+*.pid
+
+# noVNC static assets are fetched at install time, not committed
+novnc/
+
+# Scratch
+_*.py
+.scratch/
