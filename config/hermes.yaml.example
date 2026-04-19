@@ -1,0 +1,26 @@
+# Paste into ~/.hermes/config.yaml under `mcp_servers:`.
+# Point `command` at a Python env that has the `mcp` package installed.
+# Three invocation options:
+#   a) Console script (if `pip install hermes-computer-use` or `pip install -e .`):
+#        command: /path/to/.venv/bin/hermes-computer-use
+#        args: []
+#   b) Module entry point:
+#        command: /path/to/.venv/bin/python
+#        args: ["-m", "hermes_computer_use"]
+#   c) Source script directly:
+#        command: /path/to/.venv/bin/python
+#        args: ["/path/to/hermes-computer-use/src/hermes_computer_use/server.py"]
+
+mcp_servers:
+  computer_use:
+    command: ${HOME}/hermes-computer-use/.venv/bin/python
+    args: ["-m", "hermes_computer_use"]
+    env:
+      CU_DISPLAY: "99"
+      CU_WIDTH: "1440"
+      CU_HEIGHT: "900"
+      CU_STATE_DIR: /tmp/hermes-computer-use
+      # Optional: switch to /dev/uinput input for stronger HID fidelity
+      # CU_INPUT: ydotool
+    connect_timeout: 60
+    timeout: 120

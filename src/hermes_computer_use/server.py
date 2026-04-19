@@ -7,15 +7,13 @@ reachable over stdio MCP instead of a direct Anthropic call.
 """
 from __future__ import annotations
 
-import asyncio
 import base64
 import os
-import shlex
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.types import ImageContent, TextContent
@@ -132,7 +130,7 @@ def cursor_position() -> str:
     rc, out, err = _run(["xdotool", "getmouselocation", "--shell"])
     if rc != 0:
         raise RuntimeError(err)
-    kv = dict(l.split("=", 1) for l in out.strip().splitlines() if "=" in l)
+    kv = dict(line.split("=", 1) for line in out.strip().splitlines() if "=" in line)
     return f"x={kv.get('X','?')} y={kv.get('Y','?')} screen={kv.get('SCREEN','?')}"
 
 
@@ -143,7 +141,7 @@ def move(x: int, y: int, human: bool = True) -> str:
         rc, out, _ = _run(["xdotool", "getmouselocation", "--shell"])
         cx, cy = 0, 0
         if rc == 0:
-            kv = dict(l.split("=", 1) for l in out.strip().splitlines() if "=" in l)
+            kv = dict(line.split("=", 1) for line in out.strip().splitlines() if "=" in line)
             cx, cy = int(kv.get("X", 0)), int(kv.get("Y", 0))
         _humanlike_move(cx, cy, x, y, MOVE_STEPS)
     else:
@@ -200,8 +198,8 @@ def drag(x1: int, y1: int, x2: int, y2: int, steps: int = 25) -> str:
 def scroll(
     direction: Literal["up", "down", "left", "right"] = "down",
     amount: int = 3,
-    x: Optional[int] = None,
-    y: Optional[int] = None,
+    x: int | None = None,
+    y: int | None = None,
 ) -> str:
     """Scroll wheel at cursor (or at given x/y if provided). amount = click count."""
     if x is not None and y is not None:
@@ -313,8 +311,8 @@ def run_shell(cmd: str, timeout: int = 30) -> str:
     return f"exit={p.returncode}\n--- stdout ---\n{out}--- stderr ---\n{err}"
 
 
-if __name__ == "__main__":
-    # Sanity check environment at startup.
+def main() -> None:
+    """Entry point for `python -m hermes_computer_use` and the `hermes-computer-use` console script."""
     try:
         _require("xdotool")
         _require("Xvfb")
@@ -323,3 +321,7 @@ if __name__ == "__main__":
         sys.exit(2)
     _log(f"[OK] computer-use MCP ready (DISPLAY={DISPLAY}, {WIDTH}x{HEIGHT})")
     mcp.run(transport="stdio")
+
+
+if __name__ == "__main__":
+    main()

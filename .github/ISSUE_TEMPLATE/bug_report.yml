@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in the stack doesn't behave as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report. Please skim [TROUBLESHOOTING.md](../../blob/main/docs/TROUBLESHOOTING.md) first — most issues are covered there.
+
+  - type: input
+    attributes:
+      label: OS / distro
+      placeholder: "WSL2 Ubuntu 24.04 / native Ubuntu 22.04 / …"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: hermes-computer-use version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Exact commands or MCP prompt that triggers the issue.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Logs
+      description: |
+        Attach the relevant parts:
+        - `journalctl --user -u computer-use.service -n 100`
+        - `/tmp/hermes-computer-use/{xvfb,chrome,x11vnc,fluxbox}.log`
+      render: shell

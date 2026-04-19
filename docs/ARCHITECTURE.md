@@ -1,7 +1,7 @@
 # Architecture
 
 ```
- ┌─────────────────────────── hermes-agent (or any MCP client) ───────────────────────────┐
+ ┌─────────────────────────── hermes-agent  (or any MCP client) ───────────────────────────┐
  │  gpt-5.4 via openai-codex                                                              │
  │    │                                                                                    │
  │    │  stdio MCP (JSON-RPC)                                                              │

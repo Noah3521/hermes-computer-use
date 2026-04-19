@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest a new tool, flag, or integration.
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: What do you want to do?
+      description: Describe the user-facing workflow, not the implementation.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Why does it belong in this project?
+      description: |
+        See CONTRIBUTING.md "Scope guardrails." Things this project doesn't do:
+        DOM selectors, OCR, anti-detection patches, non-Linux support.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Proposed API / tool signature
+      description: If you have a concrete shape in mind.
+      render: python

@@ -1,0 +1,19 @@
+# Install into ~/.config/systemd/user/novnc.service
+# Requires `scripts/install-novnc.sh` to have been run (creates ./novnc/ dir + installs websockify).
+# Edit the websockify path to point at the Python env where you installed it.
+
+[Unit]
+Description=noVNC HTTP proxy (browser-based VNC for hermes-computer-use)
+After=computer-use.service
+Requires=computer-use.service
+
+[Service]
+Type=simple
+ExecStart=%h/hermes-computer-use/.venv/bin/websockify \
+    --web=%h/hermes-computer-use/novnc \
+    6080 localhost:5900
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
