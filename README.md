@@ -89,17 +89,32 @@ Copy the relevant snippet from [`config/hermes.yaml.example`](config/hermes.yaml
 
 If your agent has shell + filesystem tools, you can skip the manual install entirely: paste the prompt in [`docs/LLM_SETUP_PROMPT.md`](docs/LLM_SETUP_PROMPT.md) and it will clone, install, wire up systemd, run the smoke test, and report back. Available in English, 日本語, 中文, 한국어.
 
-## Tools (21)
+## Tools (30)
 
 | Category | Tools |
 |---|---|
 | Status | `screen_info`, `cursor_position` |
 | Capture | `screenshot` |
 | Pointer | `move`, `left_click`, `right_click`, `double_click`, `middle_click`, `drag`, `scroll` |
-| Keyboard | `type_text`, `press_key`, `hold_key` |
+| Keyboard | `type_text`, `press_key`, `hold_key`, `clear_field`, `select_all`, `copy`, `paste`, `cut`, `undo`, `redo`, `clipboard_set`, `clipboard_get` |
 | Timing | `wait` |
 | Browser | `open_url`, `new_tab`, `close_tab`, `back`, `forward`, `reload` |
 | Escape hatch | `run_shell` |
+| Optional DOM fast-path (`CU_ENABLE_CDP=1`) | `dom_click`, `dom_type`, `dom_query`, `dom_exists`, `dom_wait`, `dom_eval` |
+
+`press_key` accepts case-insensitive names and aliases — `Backspace`, `backspace`, `BackSpace` all work; `cmd+a`, `command-a`, `ctrl+a` all resolve; `meta`/`win`/`windows`/`cmd` map to Super.
+
+### Opt-in DOM fast-path
+
+For DOM-heavy pages where vision grounding is slow or fragile (SPA dashboards, deep forms), you can opt into CSS-selector-based clicks / typing / queries. Trade-off: Chrome exposes a DevTools port and `navigator.webdriver` flips to `true` for the session, which defeats the anti-bot posture on sites that fingerprint Chrome. Off by default.
+
+```bash
+CU_ENABLE_CDP=1 bash scripts/display.sh restart
+pip install "hermes-computer-use[dom]"        # adds websocket-client
+# Run the MCP with CU_ENABLE_CDP=1 in its env too (hermes config etc.)
+```
+
+See [docs/ARCHITECTURE.md#dom-fast-path](docs/ARCHITECTURE.md) for when to use which.
 
 ## Demo prompts
 

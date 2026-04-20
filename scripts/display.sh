@@ -56,11 +56,20 @@ start() {
     _start_bg x11vnc  x11vnc -display "$DISPLAY" -forever -shared \
                         -rfbport "$VNC_PORT" -nopw -noxdamage
     sleep 0.3
+    # Opt-in DOM fast-path: export CU_ENABLE_CDP=1 before calling `display.sh
+    # start` to expose Chrome's DevTools port (default 9222, localhost-only).
+    # This is off by default because it flips navigator.webdriver=true for
+    # the session, which defeats the anti-bot posture.
+    local cdp_flag=""
+    if [[ "${CU_ENABLE_CDP:-0}" == "1" ]]; then
+        cdp_flag="--remote-debugging-port=${CU_CDP_PORT:-9222}"
+        echo "[i] DOM fast-path ENABLED — Chrome will expose CDP on $cdp_flag"
+    fi
     _start_bg chrome  google-chrome \
         --no-sandbox --disable-gpu --disable-dev-shm-usage \
         --no-first-run --no-default-browser-check \
         --user-data-dir="$PROFILE_DIR" \
-        --window-size="$W,$H" "$START_URL"
+        --window-size="$W,$H" $cdp_flag "$START_URL"
     echo
     status
 }

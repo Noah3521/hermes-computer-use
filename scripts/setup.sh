@@ -24,6 +24,7 @@ echo "[1/4] apt packages"
 $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends \
     xvfb fluxbox x11vnc xdotool ydotool scrot imagemagick \
+    xclip xsel \
     fonts-noto-cjk fonts-noto-color-emoji \
     ca-certificates curl wget gnupg xdg-utils \
     libnss3 libatk-bridge2.0-0 libxkbcommon0 libxcomposite1 \

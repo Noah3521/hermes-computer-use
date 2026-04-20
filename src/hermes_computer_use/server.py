@@ -67,12 +67,90 @@ def _xdo(*args: str, timeout: float = 10.0) -> None:
     rc, _, err = _run(["xdotool", *args], timeout=timeout)
     if rc != 0:
         raise RuntimeError(f"xdotool {args!r} failed: {err.strip()}")
+    # xdotool prints "No such key name" to stderr but exits 0 — treat as failure.
+    if "No such key name" in err or "Unknown keysym" in err:
+        raise RuntimeError(f"xdotool {args!r} invalid key: {err.strip()}")
 
 
 def _ydo(*args: str, timeout: float = 10.0) -> None:
     rc, _, err = _run(["ydotool", *args], timeout=timeout)
     if rc != 0:
         raise RuntimeError(f"ydotool {args!r} failed: {err.strip()}")
+
+
+# Map common/alternate key spellings to xdotool keysyms. Callers get to spell
+# keys the way their agent or OS docs already spell them — we normalize.
+_KEY_ALIASES = {
+    "backspace": "BackSpace",
+    "enter": "Return",
+    "space": "space",
+    "spacebar": "space",
+    "esc": "Escape",
+    "escape": "Escape",
+    "tab": "Tab",
+    "del": "Delete",
+    "delete": "Delete",
+    "ins": "Insert",
+    "insert": "Insert",
+    "home": "Home",
+    "end": "End",
+    "pageup": "Page_Up",
+    "page_up": "Page_Up",
+    "pgup": "Page_Up",
+    "pagedown": "Page_Down",
+    "page_down": "Page_Down",
+    "pgdn": "Page_Down",
+    "up": "Up",
+    "down": "Down",
+    "left": "Left",
+    "right": "Right",
+    "caps": "Caps_Lock",
+    "capslock": "Caps_Lock",
+    "meta": "super",   # on Linux "meta" usually means the Super/Windows key
+    "win": "super",
+    "windows": "super",
+    "cmd": "super",    # Mac ergonomics — agents fluent in Cmd shortcuts
+    "command": "super",
+    "option": "alt",   # Mac ergonomics
+    "opt": "alt",
+    "ctl": "ctrl",
+    "control": "ctrl",
+    "return": "Return",
+}
+
+
+def _normalize_key(key: str) -> str:
+    """Turn a chord like 'cmd-shift-backspace' into xdotool's 'super+shift+BackSpace'.
+
+    Accepts '+' or '-' as the chord separator, arbitrary casing for modifier
+    names, and the common aliases above. Multi-character tokens get alias
+    lookup; single characters are passed through as-is (so 'a', 'A', '1', '/'
+    all work untouched)."""
+    if not key:
+        return key
+    # Known modifier tokens — case-fold them even when the alias table
+    # doesn't rewrite them, so 'Ctrl+A' stays a chord rather than xdotool's
+    # unknown keysym 'Ctrl'.
+    _modifiers = {"ctrl", "shift", "alt", "super", "meta", "cmd", "command",
+                  "option", "opt", "win", "windows", "ctl", "control"}
+
+    parts = key.replace("-", "+").split("+")
+    out = []
+    for p in parts:
+        token = p.strip()
+        if not token:
+            continue
+        if len(token) == 1:
+            out.append(token)
+            continue
+        low = token.lower()
+        if low in _KEY_ALIASES:
+            out.append(_KEY_ALIASES[low])
+        elif low in _modifiers:
+            out.append(low)
+        else:
+            out.append(token)
+    return "+".join(out)
 
 
 def _humanlike_move(x1: int, y1: int, x2: int, y2: int, steps: int) -> None:
@@ -95,11 +173,35 @@ def _humanlike_move(x1: int, y1: int, x2: int, y2: int, steps: int) -> None:
 mcp = FastMCP(
     name="computer-use",
     instructions=(
-        "Operate a real browser in an Xvfb display via pixel-level input. "
-        "Workflow: call `screenshot` → reason about pixel coordinates → call "
-        "`left_click`/`type_text`/`drag`/`scroll`/etc. → repeat. Coordinates "
-        "are absolute pixels in the virtual display. Never assume DOM state; "
-        "always re-screenshot after an action to verify."
+        "Operate a real browser in an Xvfb display via pixel-level input.\n\n"
+        "MANDATORY WORKFLOW (do not skip any step):\n"
+        "  1. ALWAYS call `screenshot` before the FIRST action of a turn. Never\n"
+        "     act on 'what I remember the page looked like' — the page may have\n"
+        "     changed, the window may have moved, a dialog may have opened.\n"
+        "  2. Reason about pixel coordinates from THAT screenshot.\n"
+        "  3. Execute ONE mutating action (click, type, scroll, drag, key).\n"
+        "  4. Call `screenshot` AGAIN to verify the action had the expected\n"
+        "     effect. If it did not, do NOT repeat the same action with the\n"
+        "     same coordinates — re-screenshot and re-plan.\n"
+        "  5. Coordinates are absolute pixels in the virtual display; 0,0 is\n"
+        "     top-left. Screen size is reported by `screen_info`.\n\n"
+        "KEYBOARD:\n"
+        "  - For plain text use `type_text`.\n"
+        "  - For any key that is NOT a printable character (Backspace, Delete,\n"
+        "    arrows, Enter, Escape) or any modifier chord (ctrl+a, cmd+v,\n"
+        "    alt+Tab) use `press_key`. `type_text` will type the literal word\n"
+        "    'Backspace' into the page if you call it with that string — that\n"
+        "    is almost never what you want.\n"
+        "  - To replace a field's contents use `clear_field` then `type_text`.\n"
+        "  - Convenience tools `select_all`, `copy`, `paste`, `cut`, `undo`,\n"
+        "    `redo`, `clipboard_set`, `clipboard_get` exist — prefer them over\n"
+        "    raw chords when the action matches.\n\n"
+        "DOM FAST-PATH (optional):\n"
+        "  If the stack was started with CU_ENABLE_CDP=1, the `dom_*` tools\n"
+        "  let you click / type / read via CSS selector — much faster and more\n"
+        "  accurate than pixel clicks on complex DOM-heavy sites. Using them\n"
+        "  flips `navigator.webdriver=true` for the session, so only enable\n"
+        "  them on sites where anti-bot fingerprinting is not a concern."
     ),
 )
 
@@ -218,21 +320,114 @@ def type_text(text: str, delay_ms: int = KEY_DELAY_MS) -> str:
 
 @mcp.tool()
 def press_key(key: str) -> str:
-    """Press a single key or chord. Examples: 'Return', 'Escape', 'Tab',
-    'ctrl+c', 'ctrl+shift+t', 'alt+Left'."""
-    _xdo("key", "--delay", "20", key)
-    return f"pressed {key}"
+    """Press a single key or chord. Case-insensitive names + aliases are
+    normalised automatically — `Backspace`, `backspace`, `BackSpace` all work;
+    `cmd+a`, `command-a`, `ctrl+a` all resolve; `meta`/`win`/`windows`/`cmd`
+    map to the Super key.
+
+    Common examples:
+      letters / digits : "a", "A", "1", "/"
+      navigation       : "Return", "Escape", "Tab", "Backspace", "Delete",
+                         "Home", "End", "PageUp", "PageDown",
+                         "Up", "Down", "Left", "Right"
+      chords           : "ctrl+a", "ctrl+c", "ctrl+v", "ctrl+x", "ctrl+z",
+                         "ctrl+shift+t", "alt+Left", "alt+F4",
+                         "ctrl+BackSpace"  (delete previous word)
+    """
+    normalized = _normalize_key(key)
+    _xdo("key", "--clearmodifiers", "--delay", "20", normalized)
+    return f"pressed {normalized}" + (f" (from '{key}')" if normalized != key else "")
 
 
 @mcp.tool()
 def hold_key(key: str, ms: int = 500) -> str:
-    """Hold a key down for ms milliseconds, then release."""
-    _xdo("keydown", key)
+    """Hold a key down for ms milliseconds, then release. Same key naming
+    rules as `press_key`."""
+    normalized = _normalize_key(key)
+    _xdo("keydown", normalized)
     try:
         time.sleep(max(0, ms) / 1000.0)
     finally:
-        _xdo("keyup", key)
-    return f"held {key} {ms}ms"
+        _xdo("keyup", normalized)
+    return f"held {normalized} {ms}ms"
+
+
+@mcp.tool()
+def clear_field() -> str:
+    """Select all text in the focused widget and delete it. Handy before
+    `type_text` when you need to replace a field's contents rather than append."""
+    _xdo("key", "--clearmodifiers", "ctrl+a")
+    time.sleep(0.05)
+    _xdo("key", "--clearmodifiers", "Delete")
+    return "cleared focused field"
+
+
+@mcp.tool()
+def select_all() -> str:
+    """Select all content in the focused widget (ctrl+a)."""
+    _xdo("key", "--clearmodifiers", "ctrl+a")
+    return "selected all"
+
+
+@mcp.tool()
+def copy() -> str:
+    """Copy the current selection to clipboard (ctrl+c)."""
+    _xdo("key", "--clearmodifiers", "ctrl+c")
+    return "copied"
+
+
+@mcp.tool()
+def paste() -> str:
+    """Paste the clipboard into the focused widget (ctrl+v)."""
+    _xdo("key", "--clearmodifiers", "ctrl+v")
+    return "pasted"
+
+
+@mcp.tool()
+def cut() -> str:
+    """Cut the current selection to clipboard (ctrl+x)."""
+    _xdo("key", "--clearmodifiers", "ctrl+x")
+    return "cut"
+
+
+@mcp.tool()
+def undo() -> str:
+    """Undo the last edit in the focused widget (ctrl+z)."""
+    _xdo("key", "--clearmodifiers", "ctrl+z")
+    return "undo"
+
+
+@mcp.tool()
+def redo() -> str:
+    """Redo the last undone edit (ctrl+shift+z)."""
+    _xdo("key", "--clearmodifiers", "ctrl+shift+z")
+    return "redo"
+
+
+@mcp.tool()
+def clipboard_set(text: str) -> str:
+    """Put text on the system clipboard (useful when `type_text` would be too
+    slow, or when inserting characters xdotool cannot synthesise).
+
+    Uses xclip if available, otherwise xsel. Then paste with the `paste` tool."""
+    for prog in (["xclip", "-selection", "clipboard"], ["xsel", "-b", "-i"]):
+        if subprocess.run(["which", prog[0]], capture_output=True).returncode == 0:
+            p = subprocess.Popen(prog, stdin=subprocess.PIPE, env=_env())
+            p.communicate(text.encode("utf-8"))
+            if p.returncode == 0:
+                return f"clipboard_set {len(text)} char(s) via {prog[0]}"
+    raise RuntimeError("neither xclip nor xsel is installed — run setup.sh again")
+
+
+@mcp.tool()
+def clipboard_get() -> str:
+    """Read the current clipboard text."""
+    for prog in (["xclip", "-selection", "clipboard", "-o"], ["xsel", "-b", "-o"]):
+        if subprocess.run(["which", prog[0]], capture_output=True).returncode == 0:
+            p = subprocess.run(prog, capture_output=True, env=_env(), timeout=5)
+            if p.returncode == 0:
+                return p.stdout.decode("utf-8", "replace")
+    raise RuntimeError("neither xclip nor xsel is installed — run setup.sh again")
 
 
 @mcp.tool()
@@ -311,6 +506,20 @@ def run_shell(cmd: str, timeout: int = 30) -> str:
     return f"exit={p.returncode}\n--- stdout ---\n{out}--- stderr ---\n{err}"
 
 
+def _maybe_register_dom_tools() -> None:
+    """If CU_ENABLE_CDP=1 and Chrome has a DevTools port reachable, register
+    the `dom_*` tools. Silent no-op otherwise — no breakage on setups that
+    never opted in."""
+    if os.environ.get("CU_ENABLE_CDP", "").strip() not in ("1", "true", "yes"):
+        return
+    try:
+        from hermes_computer_use import dom
+        n = dom.register(mcp)
+        _log(f"[OK] DOM fast-path enabled ({n} dom_* tools registered)")
+    except Exception as e:
+        _log(f"[WARN] CU_ENABLE_CDP set but DOM tools failed to register: {e}")
+
+
 def main() -> None:
     """Entry point for `python -m hermes_computer_use` and the `hermes-computer-use` console script."""
     try:
@@ -319,6 +528,7 @@ def main() -> None:
     except RuntimeError as e:
         _log(f"[FATAL] {e}")
         sys.exit(2)
+    _maybe_register_dom_tools()
     _log(f"[OK] computer-use MCP ready (DISPLAY={DISPLAY}, {WIDTH}x{HEIGHT})")
     mcp.run(transport="stdio")
 

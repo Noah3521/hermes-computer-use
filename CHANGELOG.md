@@ -6,6 +6,48 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Silent backspace / keyboard-shortcut failures.** `xdotool key Backspace`
+  exits with code 0 and a `"No such key name"` warning on stderr, so the
+  previous `_xdo` wrapper reported success while the key was silently
+  dropped. `_xdo` now inspects stderr for that warning and raises; users
+  see an explicit error instead of a mystery no-op.
+- **Key-name case sensitivity.** `press_key` / `hold_key` now normalise
+  common spellings via `_normalize_key`: `Backspace` → `BackSpace`,
+  `ctrl-a` → `ctrl+a`, `cmd+c` / `win+r` / `meta+l` → `super+*`,
+  `option+Left` → `alt+Left`, `Ctrl+A` → `ctrl+A`.
+
+### Added
+
+- **Keyboard convenience tools** — `clear_field`, `select_all`, `copy`,
+  `paste`, `cut`, `undo`, `redo`, `clipboard_set`, `clipboard_get`.
+  Removes the need for agents to remember raw chords or get the key-
+  naming right.
+- **`clipboard_set` / `clipboard_get`** use xclip or xsel (installed by
+  `setup.sh`). Useful for injecting text faster than `type_text` can
+  synthesise, or for characters xdotool cannot produce.
+- **Optional DOM fast-path** — gated behind `CU_ENABLE_CDP=1`, exposes
+  six new tools: `dom_click`, `dom_type`, `dom_query`, `dom_exists`,
+  `dom_wait`, `dom_eval`. Uses Chrome's DevTools Protocol via
+  `websocket-client` (new `[dom]` extra). Off by default because it
+  flips `navigator.webdriver=true`.
+- **Tool-surface guard test** (`tests/test_import.py`) expanded to cover
+  the new keyboard tools; new `tests/test_key_normalize.py` parameterises
+  the alias table against real-world misspellings.
+- **Server instructions strengthened** — the FastMCP `instructions`
+  string now enforces a screenshot-before-action / screenshot-after-
+  action loop, documents the keyboard rules, and explains when to reach
+  for the DOM fast-path instead of pixel clicks.
+
+### Changed
+
+- `scripts/setup.sh` now installs `xclip` and `xsel` for clipboard tools.
+- `scripts/display.sh` accepts `CU_ENABLE_CDP=1` and passes
+  `--remote-debugging-port=$CU_CDP_PORT` (default 9222) to Chrome.
+- CONTRIBUTING scope: hybrid DOM / CDP paths are welcome when they are
+  additive and opt-in; blanket "no DOM" rule removed.
+
 ## [0.1.0] - 2026-04-20
 
 ### Added

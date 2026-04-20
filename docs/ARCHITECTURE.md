@@ -55,12 +55,20 @@
 - Internal eased-cubic interpolation with jitter to avoid straight-line mouse paths
 - `CU_INPUT=ydotool` switches input to `/dev/uinput` kernel layer for stronger HID fidelity
 
-## What it doesn't do (by design)
+## DOM fast-path (optional, off by default)
 
-- No CDP / DevTools Protocol
-- No `navigator.webdriver` flag, no Selenium marker
-- No DOM queries or CSS selectors — all grounding is via rendered pixels and optional vision models on the client
-- No built-in anti-detection patches beyond clean Chrome defaults — the model of "zero abnormal signals" is what keeps detection rates low
+Pixel automation is the default because it makes the browser fingerprint-indistinguishable from stock Chrome. There are tasks where that is wasteful — operating a known-good SPA dashboard, filling a long form, asserting on nested DOM state — and the `screenshot → vision → click` round trip dominates wall time.
+
+Set `CU_ENABLE_CDP=1` before `scripts/display.sh` start and the server registers `dom_click(selector)`, `dom_type(selector, text)`, `dom_query(selector)`, `dom_exists(selector)`, `dom_wait(selector, ms)`, `dom_eval(js)` via Chrome's DevTools Protocol. These are often 5–50× faster than the equivalent pixel flow on a dynamic SPA.
+
+**The trade-off is real**: attaching a CDP client sets `navigator.webdriver=true` for the session. On Cloudflare Bot Fight Mode / Kasada / reCAPTCHA-v3-fingerprinted sites that is enough to get flagged. The intended model is "use pixel mode by default; enable CDP per-site for flows you know aren't fingerprinted, then turn it off again." Not "leave CDP on forever."
+
+## What it doesn't do by default
+
+- No CDP / DevTools Protocol unless `CU_ENABLE_CDP=1` is explicitly set.
+- No `navigator.webdriver` flag, no Selenium marker, no CDP port open.
+- DOM queries and CSS selectors are available via the opt-in `dom_*` tools only — everything else is pixel-grounded.
+- No built-in anti-detection patches beyond clean Chrome defaults — "zero abnormal signals" is what keeps detection rates low; OCR, CAPTCHA solvers, and evasion patches live in the agent, not the server.
 
 ## Failure modes
 

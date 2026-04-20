@@ -27,8 +27,13 @@ def test_tool_surface_expected():
     # Each @mcp.tool() leaves a module-level function.
     expected = {
         "back",
+        "clear_field",
+        "clipboard_get",
+        "clipboard_set",
         "close_tab",
+        "copy",
         "cursor_position",
+        "cut",
         "double_click",
         "drag",
         "forward",
@@ -38,14 +43,18 @@ def test_tool_surface_expected():
         "move",
         "new_tab",
         "open_url",
+        "paste",
         "press_key",
+        "redo",
         "reload",
         "right_click",
         "run_shell",
         "screen_info",
         "screenshot",
         "scroll",
+        "select_all",
         "type_text",
+        "undo",
         "wait",
     }
     actual = {name for name in dir(server) if not name.startswith("_") and callable(getattr(server, name))}
