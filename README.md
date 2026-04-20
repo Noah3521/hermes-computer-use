@@ -1,6 +1,7 @@
 # hermes-computer-use
 
 [![CI](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml/badge.svg)](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/hermes-computer-use.svg)](https://pypi.org/project/hermes-computer-use/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Platform: WSL2 Ubuntu](https://img.shields.io/badge/platform-WSL2%20Ubuntu-0078D6?logo=ubuntu&logoColor=white)](docs/WSL_SETUP.md)
@@ -8,6 +9,10 @@
 > **Scope: Windows 11 + WSL2 Ubuntu 22.04 / 24.04 only.** This project intentionally limits its support matrix — native Linux / macOS / Windows are not targets. See [docs/WSL_SETUP.md](docs/WSL_SETUP.md) for why and for the full setup walkthrough.
 
 **Pixel-level browser automation MCP server.** Gives any MCP-speaking agent (hermes-agent, Claude Code, Codex, …) 21 tools to drive a real Chrome browser running in an Xvfb display: screenshots as vision input, OS-level mouse/keyboard as output. No CDP. No `navigator.webdriver`. No DOM shortcuts.
+
+<p align="center"><img src="docs/assets/hero.png" alt="An agent-driven Chrome reached the Korean NOL/Interpark SSO login page via five hops from a cold Google search, with no captcha, anti-bot challenge, or DOM hook." width="760"></p>
+
+> The screenshot above is the end state of [`examples/demo_prompts.md` scenario 9](examples/demo_prompts.md#9-google--external-site--internal-sso-5-hop): the agent typed `인터파크 티켓` into Google, clicked the top result, clicked *로그인* on the destination site, and was handed off to the SSO provider — all from pixels + xdotool. To reproduce it live, open `http://localhost:6080/vnc.html` while the agent runs.
 
 Think of it as the Linux-side reproduction of Anthropic's `computer-use-demo` — but exposed over stdio MCP so you can pair it with any agent runtime and any vision-capable model.
 
@@ -42,6 +47,17 @@ If your automation has to walk a login funnel on a site with Cloudflare, Kasada,
 **Prerequisites (Windows host):** Windows 11, [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) with an Ubuntu 22.04 or 24.04 distro, and [systemd enabled in WSL](docs/WSL_SETUP.md#1-enable-systemd). Full walkthrough in [docs/WSL_SETUP.md](docs/WSL_SETUP.md).
 
 Everything below runs **inside the WSL shell**, not in PowerShell.
+
+### Option A — from PyPI (recommended once published)
+
+```bash
+pip install hermes-computer-use[novnc]
+hermes-computer-use --help      # confirms the console script is on PATH
+```
+
+You still need the system packages (Xvfb, Chrome, xdotool, …) and the systemd units — see **Option B step 1 & 4** below.
+
+### Option B — from source
 
 ```bash
 git clone https://github.com/Noah3521/hermes-computer-use.git ~/hermes-computer-use
