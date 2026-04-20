@@ -25,7 +25,7 @@ This server gives an LLM the ability to move a real mouse, press real keys, and 
 ## Not included
 
 - No built-in authentication between hermes-agent and this MCP server. stdio transport assumes the client process is trusted.
-- No audit log of tool calls. Add one via `hermes` gateway logs or wrap `computer_use_mcp.py` with a logging proxy if you need SOC-level traceability.
+- No audit log of tool calls. Add one via the client's gateway logs or wrap `src/hermes_computer_use/server.py` with a logging proxy if you need SOC-level traceability.
 - No anti-detection patches beyond stock Chrome flags. This project's thesis is that "no abnormal signals" > "sophisticated evasion." If you fight the fingerprinting arms race, you move outside this repo's scope.
 
 ## Reporting issues

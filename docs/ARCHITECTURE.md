@@ -6,7 +6,7 @@
  │    │                                                                                    │
  │    │  stdio MCP (JSON-RPC)                                                              │
  │    ▼                                                                                    │
- │  computer_use_mcp.py  ── 21 tools: screenshot / click / type / drag / scroll / ...      │
+ │  hermes_computer_use.server  ── 21 tools: screenshot / click / type / drag / scroll /... │
  │    │                                                                                    │
  │    │  subprocess                                                                        │
  │    ▼                                                                                    │

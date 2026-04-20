@@ -1,6 +1,11 @@
 build/
 dist/
 __pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 *.pyc
 *.pyo
 *.egg-info/
