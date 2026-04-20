@@ -28,10 +28,19 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `setup.sh`). Useful for injecting text faster than `type_text` can
   synthesise, or for characters xdotool cannot produce.
 - **Optional DOM fast-path** — gated behind `CU_ENABLE_CDP=1`, exposes
-  six new tools: `dom_click`, `dom_type`, `dom_query`, `dom_exists`,
-  `dom_wait`, `dom_eval`. Uses Chrome's DevTools Protocol via
-  `websocket-client` (new `[dom]` extra). Off by default because it
-  flips `navigator.webdriver=true`.
+  eight new tools: `dom_click`, `dom_type`, `dom_query`, `dom_exists`,
+  `dom_wait`, `dom_eval`, `network_capture`, `console_messages`. Uses
+  Chrome's DevTools Protocol via `websocket-client` (new `[dom]` extra).
+  Off by default because it flips `navigator.webdriver=true`.
+- **`network_capture(duration_ms, url_contains, include_bodies, max_body_bytes)`**
+  — synchronously records every HTTP request Chrome makes during the window
+  and returns JSON summaries with method / url / status / mime / size /
+  duration. With `include_bodies=True`, response bodies matching
+  `url_contains` are inlined (fetched on the same CDP session to avoid
+  the requestId-session-scope problem where bodies cannot be retrieved
+  from a later call).
+- **`console_messages(duration_ms)`** — captures `console.log/warn/error/info`
+  and uncaught JS exceptions into a structured list.
 - **Tool-surface guard test** (`tests/test_import.py`) expanded to cover
   the new keyboard tools; new `tests/test_key_normalize.py` parameterises
   the alias table against real-world misspellings.
@@ -44,7 +53,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - `scripts/setup.sh` now installs `xclip` and `xsel` for clipboard tools.
 - `scripts/display.sh` accepts `CU_ENABLE_CDP=1` and passes
-  `--remote-debugging-port=$CU_CDP_PORT` (default 9222) to Chrome.
+  `--remote-debugging-port=$CU_CDP_PORT` (default 9222),
+  `--remote-allow-origins=*` (required by Chrome 123+ to accept our
+  WebSocket handshake), and `--remote-debugging-address=127.0.0.1`
+  (keep the port localhost-only even with wildcard origins) to Chrome.
+- `_active_target_ws` skips `chrome://` / `chrome-extension://` /
+  `devtools://` targets (omnibox popups, DevTools UI) and prefers
+  unattached pages so DOM tools land on the real tab.
 - CONTRIBUTING scope: hybrid DOM / CDP paths are welcome when they are
   additive and opt-in; blanket "no DOM" rule removed.
 
@@ -77,3 +92,4 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [Unreleased]: https://github.com/Noah3521/hermes-computer-use/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Noah3521/hermes-computer-use/releases/tag/v0.1.0
+

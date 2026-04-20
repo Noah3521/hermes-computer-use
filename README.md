@@ -100,7 +100,7 @@ If your agent has shell + filesystem tools, you can skip the manual install enti
 | Timing | `wait` |
 | Browser | `open_url`, `new_tab`, `close_tab`, `back`, `forward`, `reload` |
 | Escape hatch | `run_shell` |
-| Optional DOM fast-path (`CU_ENABLE_CDP=1`) | `dom_click`, `dom_type`, `dom_query`, `dom_exists`, `dom_wait`, `dom_eval` |
+| Optional DOM fast-path (`CU_ENABLE_CDP=1`) | `dom_click`, `dom_type`, `dom_query`, `dom_exists`, `dom_wait`, `dom_eval`, `network_capture`, `console_messages` |
 
 `press_key` accepts case-insensitive names and aliases — `Backspace`, `backspace`, `BackSpace` all work; `cmd+a`, `command-a`, `ctrl+a` all resolve; `meta`/`win`/`windows`/`cmd` map to Super.
 

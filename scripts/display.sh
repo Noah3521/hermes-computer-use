@@ -62,8 +62,12 @@ start() {
     # the session, which defeats the anti-bot posture.
     local cdp_flag=""
     if [[ "${CU_ENABLE_CDP:-0}" == "1" ]]; then
-        cdp_flag="--remote-debugging-port=${CU_CDP_PORT:-9222}"
-        echo "[i] DOM fast-path ENABLED — Chrome will expose CDP on $cdp_flag"
+        # --remote-allow-origins=* is required by recent Chrome (123+) or the
+        # CDP WebSocket endpoint rejects our client's Origin header with 403.
+        # We keep the port bound to localhost via --remote-debugging-address=
+        # below so wildcarding origins is still safe.
+        cdp_flag="--remote-debugging-port=${CU_CDP_PORT:-9222} --remote-allow-origins=* --remote-debugging-address=127.0.0.1"
+        echo "[i] DOM fast-path ENABLED — Chrome CDP on localhost:${CU_CDP_PORT:-9222}"
     fi
     _start_bg chrome  google-chrome \
         --no-sandbox --disable-gpu --disable-dev-shm-usage \
