@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "hermes-computer-use"
 version = "0.1.0"
-description = "Pixel-level browser automation MCP server — drive a real Chrome browser with screenshot + xdotool, no CDP."
+description = "Pixel-level browser automation MCP server for WSL2 — drive a real Chrome with screenshot + xdotool, no CDP."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -19,10 +19,13 @@ keywords = [
     "agent",
     "hermes-agent",
     "anti-bot",
+    "wsl",
+    "wsl2",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
+    "Environment :: X11 Applications",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",

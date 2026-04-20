@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
-# One-shot installer for computer-use integration.
+# One-shot installer for hermes-computer-use (WSL2 Ubuntu target).
 # Installs Xvfb + fluxbox + VNC + xdotool + ydotool + Chrome + fonts.
 set -euo pipefail
+
+# -- Guardrail: WSL2 Ubuntu is the only supported target.
+if ! grep -qiE 'microsoft|wsl' /proc/version 2>/dev/null; then
+    echo "[!] This installer targets WSL2 Ubuntu only. Detected kernel:" >&2
+    uname -a >&2
+    echo "    Set HCU_ALLOW_ANY_LINUX=1 to bypass at your own risk." >&2
+    [[ "${HCU_ALLOW_ANY_LINUX:-0}" != "1" ]] && exit 2
+fi
+if command -v lsb_release >/dev/null 2>&1; then
+    _distro=$(lsb_release -is 2>/dev/null || echo unknown)
+    if [[ "$_distro" != "Ubuntu" && "${HCU_ALLOW_ANY_LINUX:-0}" != "1" ]]; then
+        echo "[!] Non-Ubuntu distro ($_distro) — not tested. Set HCU_ALLOW_ANY_LINUX=1 to try." >&2
+        exit 2
+    fi
+fi
 
 SUDO=$(command -v sudo || true)
 

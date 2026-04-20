@@ -3,6 +3,9 @@
 [![CI](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml/badge.svg)](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![Platform: WSL2 Ubuntu](https://img.shields.io/badge/platform-WSL2%20Ubuntu-0078D6?logo=ubuntu&logoColor=white)](docs/WSL_SETUP.md)
+
+> **Scope: Windows 11 + WSL2 Ubuntu 22.04 / 24.04 only.** This project intentionally limits its support matrix — native Linux / macOS / Windows are not targets. See [docs/WSL_SETUP.md](docs/WSL_SETUP.md) for why and for the full setup walkthrough.
 
 **Pixel-level browser automation MCP server.** Gives any MCP-speaking agent (hermes-agent, Claude Code, Codex, …) 21 tools to drive a real Chrome browser running in an Xvfb display: screenshots as vision input, OS-level mouse/keyboard as output. No CDP. No `navigator.webdriver`. No DOM shortcuts.
 
@@ -36,7 +39,9 @@ If your automation has to walk a login funnel on a site with Cloudflare, Kasada,
 
 ## Install
 
-Requires Linux with systemd user sessions (WSL2 Ubuntu 22.04+ is a primary target).
+**Prerequisites (Windows host):** Windows 11, [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) with an Ubuntu 22.04 or 24.04 distro, and [systemd enabled in WSL](docs/WSL_SETUP.md#1-enable-systemd). Full walkthrough in [docs/WSL_SETUP.md](docs/WSL_SETUP.md).
+
+Everything below runs **inside the WSL shell**, not in PowerShell.
 
 ```bash
 git clone https://github.com/Noah3521/hermes-computer-use.git ~/hermes-computer-use

@@ -5,18 +5,29 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to report. Please skim [TROUBLESHOOTING.md](../../blob/main/docs/TROUBLESHOOTING.md) first — most issues are covered there.
+        Thanks for reporting. Please skim [TROUBLESHOOTING.md](../../blob/main/docs/TROUBLESHOOTING.md) and [FAQ.md](../../blob/main/docs/FAQ.md) first — most issues are covered there.
+
+        **Note:** This project supports WSL2 Ubuntu only. Issues on native Linux, macOS, or other distros will be closed unless someone wants to take ownership of that platform long-term.
 
   - type: input
     attributes:
-      label: OS / distro
-      placeholder: "WSL2 Ubuntu 24.04 / native Ubuntu 22.04 / …"
+      label: Windows version
+      placeholder: "Windows 11 23H2 / build 22631.xxxx"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: WSL distro + version
+      description: Output of `wsl -l -v` from PowerShell.
+      placeholder: "Ubuntu-24.04, version 2, kernel 6.6.87-microsoft-standard-WSL2"
     validations:
       required: true
 
   - type: input
     attributes:
       label: Python version
+      description: Inside WSL, `python3 --version`.
       placeholder: "3.12.3"
     validations:
       required: true
@@ -25,6 +36,13 @@ body:
     attributes:
       label: hermes-computer-use version
       placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: MCP client
+      placeholder: "hermes-agent / Claude Code / Codex / custom"
     validations:
       required: true
 
@@ -49,4 +67,5 @@ body:
         Attach the relevant parts:
         - `journalctl --user -u computer-use.service -n 100`
         - `/tmp/hermes-computer-use/{xvfb,chrome,x11vnc,fluxbox}.log`
+        - `systemctl --user status computer-use.service --no-pager`
       render: shell
