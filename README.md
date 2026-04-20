@@ -1,5 +1,7 @@
 # hermes-computer-use
 
+**English** · [日本語](README.ja.md) · [中文](README.zh.md) · [한국어](README.ko.md)
+
 [![CI](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml/badge.svg)](https://github.com/Noah3521/hermes-computer-use/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/hermes-computer-use.svg)](https://pypi.org/project/hermes-computer-use/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -83,6 +85,10 @@ Smoke test: `python examples/smoke_test.py`.
 
 Copy the relevant snippet from [`config/hermes.yaml.example`](config/hermes.yaml.example) into your agent's MCP server config. Works with hermes-agent, Claude Code, Codex, `mcp-inspector`, or any stdio MCP client.
 
+## Hand the install to an LLM
+
+If your agent has shell + filesystem tools, you can skip the manual install entirely: paste the prompt in [`docs/LLM_SETUP_PROMPT.md`](docs/LLM_SETUP_PROMPT.md) and it will clone, install, wire up systemd, run the smoke test, and report back. Available in English, 日本語, 中文, 한국어.
+
 ## Tools (21)
 
 | Category | Tools |
@@ -136,7 +142,7 @@ This is an LLM with hands. Read [SECURITY.md](SECURITY.md). Baseline:
 
 ## Contributing
 
-[CONTRIBUTING.md](CONTRIBUTING.md). The thesis is **"emit no abnormal signals" > "emit clever evasions"** — PRs that add CDP, DOM selectors, or anti-detection arms-race patches are out of scope.
+See [CONTRIBUTING.md](CONTRIBUTING.md). The guiding thesis is **"emit no abnormal signals by default" > "emit clever evasions"** — but additive hybrid paths (e.g. opt-in DOM / CDP fast-clicks that users turn on per-site) are welcome when they do not flip the default posture.
 
 ## License
 

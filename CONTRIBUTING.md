@@ -40,12 +40,22 @@ python examples/smoke_test.py
 - `pytest` runs unit tests that don't need a display.
 - End-to-end tests (screenshots, clicks) require Xvfb and are not run in CI by default. Label them `@pytest.mark.e2e` and skip by default.
 
-## Scope guardrails (things that don't belong here)
+## Scope
 
-- DOM/CSS selectors or CDP wrappers. Use Playwright.
-- OCR. Pass the screenshot to a vision model and let it reason.
-- Anti-detection patches beyond stock Chrome flags. The thesis is "no abnormal signals" > "evasion".
-- OS support other than Linux. macOS/Windows have very different input APIs; those deserve their own repo.
+### Welcome
+
+- **New MCP tools** that cover legitimate browser/desktop operations not yet represented (audio routing, file drag-drop, multi-monitor, clipboard, etc.).
+- **Hybrid fast paths.** Pixel automation is the default, but a PR that exposes an opt-in DOM / CDP helper — e.g. `dom_fast_click(selector)` — is fine when it is *additive* and users can still fall back to the pixel tools on sites where the DOM path is risky or fingerprintable. The interesting design question is *which sites can safely use the fast path*; a heuristic or per-site toggle around that belongs here.
+- Accessibility tree (AT-SPI) side channels for more reliable grounding.
+- Recording / replay tooling, better observability, Docker packaging, alternative display backends.
+- **Docs, translations, and examples.** The README is already mirrored in 日本語 / 中文 / 한국어 — keep them honest if you change the canonical English.
+
+### Think twice
+
+- **`navigator.webdriver=true` or a live CDP port by default.** The repo's selling point is emitting no abnormal signals. Anything that flips those flags globally needs a clear off-by-default design. Opt-in is fine; default-on defeats the core thesis.
+- OCR bundled in the server. The agent's vision model is the OCR; shipping an extra engine usually adds weight without improving outcomes.
+- Anti-detection arms-race patches. Stock Chrome + stock X input is deliberately boring — PRs that start tracking and patching specific detectors will sprawl quickly.
+- **OS support beyond WSL2 Ubuntu.** macOS / native Linux / Windows all need their own input stacks; a best-effort port is usually worse than a dedicated fork.
 
 ## Reporting security issues
 
