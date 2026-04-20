@@ -10,9 +10,22 @@
 
 **Pixel-level browser automation MCP server.** Gives any MCP-speaking agent (hermes-agent, Claude Code, Codex, …) 21 tools to drive a real Chrome browser running in an Xvfb display: screenshots as vision input, OS-level mouse/keyboard as output. No CDP. No `navigator.webdriver`. No DOM shortcuts.
 
-<p align="center"><img src="docs/assets/hero.png" alt="An agent-driven Chrome reached the Korean NOL/Interpark SSO login page via five hops from a cold Google search, with no captcha, anti-bot challenge, or DOM hook." width="760"></p>
+<p align="center"><img src="docs/assets/demo-google.png" alt="A live Google search for 'anti-bot detection techniques' served by the agent-driven Chrome — no captcha, no 'unusual traffic' block. Top result is ironically Fingerprint's ad for bot-detection software." width="760"></p>
 
-> The screenshot above is the end state of [`examples/demo_prompts.md` scenario 9](examples/demo_prompts.md#9-google--external-site--internal-sso-5-hop): the agent typed `인터파크 티켓` into Google, clicked the top result, clicked *로그인* on the destination site, and was handed off to the SSO provider — all from pixels + xdotool. To reproduce it live, open `http://localhost:6080/vnc.html` while the agent runs.
+> **The agent-driven Chrome here is searching Google for `anti-bot detection techniques` — and Google serves a normal SERP. The top sponsored result is ironically an ad for bot-detection software.**
+
+### Live captcha runs (actual recordings from this stack)
+
+<table>
+<tr>
+<td align="center"><a href="docs/assets/demo-turnstile.gif"><img src="docs/assets/demo-turnstile.gif" width="300" alt="Cloudflare Turnstile — our cursor arcs in with human-like interpolation, clicks the 'Verify you are human' checkbox, and the widget flips to 'Success!' with a green checkmark."></a><br><sub><b>Cloudflare Turnstile</b><br>✅ clicked → "Success!"</sub></td>
+<td align="center"><a href="docs/assets/demo-cf-challenge.gif"><img src="docs/assets/demo-cf-challenge.gif" width="300" alt="Cloudflare Challenge — page loads, the challenge auto-runs in the background, then prints 'Captcha is passed successfully!' with no user interaction needed."></a><br><sub><b>Cloudflare Challenge</b><br>✅ passive pass, zero clicks</sub></td>
+<td align="center"><a href="docs/assets/demo-recaptcha.gif"><img src="docs/assets/demo-recaptcha.gif" width="300" alt="reCAPTCHA v2 on Google's official demo page — our cursor arcs in and clicks 'I'm not a robot'. The click is accepted; Google then asks an image challenge because the profile has no cookie history."></a><br><sub><b>reCAPTCHA v2</b><br>🟡 click accepted → image challenge (cold profile)</sub></td>
+</tr>
+</table>
+
+> All three GIFs are unedited captures from the running stack. See [docs/CAPTCHA.md](docs/CAPTCHA.md) for the full capability matrix, including why reCAPTCHA escalates on cold profiles and how to reach silent pass. Also:
+> - [`docs/assets/demo-sannysoft.png`](docs/assets/demo-sannysoft.png) — [bot.sannysoft.com](https://bot.sannysoft.com) fingerprint panel with WebDriver / Chrome / Permissions / Plugins / Languages / PHANTOM all **passed**. The only red cell is WebGL (side effect of `--disable-gpu`).
 
 Think of it as the Linux-side reproduction of Anthropic's `computer-use-demo` — but exposed over stdio MCP so you can pair it with any agent runtime and any vision-capable model.
 
