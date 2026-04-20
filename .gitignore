@@ -16,6 +16,6 @@ state/
 # noVNC static assets are fetched at install time, not committed
 novnc/
 
-# Scratch
-_*.py
+# Scratch (single-underscore prefix, keep dunders like __init__.py)
+_[!_]*.py
 .scratch/
