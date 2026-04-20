@@ -16,7 +16,7 @@ No challenge shown — the page just decides "bot or not" from headers, JS probe
 | [fingerprint.com/demo](https://fingerprint.com/demo/) | 🟡 commercial product, sometimes flags | Fingerprint.com's own stack is closer to "enterprise" tier. |
 | [browserscan.net/bot-detection](https://www.browserscan.net/bot-detection) | 🟢 browser=human | — |
 | [arh.antoinevastel.com/bots/areyouheadless](https://arh.antoinevastel.com/bots/areyouheadless) | 🟢 "not headless" | Because we're genuinely headful under Xvfb, not using `--headless`. |
-| Google search under load | 🟢 no captcha | Works cleanly from WSL IPs in Korea; expect "unusual traffic" on shared cloud IPs. |
+| Google search under load | 🟢 no captcha (residential IPs) | "Unusual traffic" blocks are IP-reputation driven, not fingerprint driven. Expect them on shared cloud / datacenter IPs. |
 
 ## Interactive challenges
 
